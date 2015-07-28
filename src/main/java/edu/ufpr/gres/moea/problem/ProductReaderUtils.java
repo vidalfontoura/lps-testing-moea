@@ -11,14 +11,18 @@ import java.util.stream.Stream;
 
 public class ProductReaderUtils {
 
-    public static List<Product> readProductsAndMutants(String productsPath, String prodMutPath) throws IOException {
+    public static List<Product> readProductsAndMutants(String productsPath, String prodMutPath, String prodPairs)
+        throws IOException {
 
         List<Product> products = ProductReaderUtils.readProducts(productsPath);
         List<String> mutants = ProductReaderUtils.readProductsMutants(prodMutPath);
+        List<String> pairs = ProductReaderUtils.readPairs(prodPairs);
 
         for (int i = 0; i < products.size(); i++) {
             List<String> mutantsList = Arrays.asList(mutants.get(i).split(","));
             products.get(i).setMutants(mutantsList);
+            List<String> pairsList = Arrays.asList(pairs.get(i).split(","));
+            products.get(i).setPairs(pairsList);
         }
 
         return products;
@@ -57,12 +61,26 @@ public class ProductReaderUtils {
         }
     }
 
+    public static List<String> readPairs(String filepath) throws IOException {
+
+        Path path = Paths.get(filepath);
+        try (Stream<String> lines = Files.lines(path)) {
+            Stream<String> productPairs = lines.filter(line -> line.contains("Product"));
+            return productPairs.map(prodPairsLine -> {
+                String[] split = prodPairsLine.split("Pairs:");
+                return split[1].replace("[", "").replace("]", "");
+            }).collect(Collectors.toList());
+        }
+    }
+
     public static void main(String[] args) throws IOException {
 
         String productsPath = "products_mutants/PROD_";
         String productsMutantsPath = "products_mutants/PROD_MUTANTS_";
+        String productsPairs = "products_mutants/PROD_PAIRS_";
 
-        List<Product> readProductsFile = ProductReaderUtils.readProductsAndMutants(productsPath, productsMutantsPath);
+        List<Product> readProductsFile =
+            ProductReaderUtils.readProductsAndMutants(productsPath, productsMutantsPath, productsPairs);
         for (Product product : readProductsFile) {
             System.out.println(product.toString());
         }

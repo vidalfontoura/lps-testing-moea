@@ -21,10 +21,16 @@ public class ExperimentsMain {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        String experimentsDir = "experiments";
+        String experimentsDir = "experiments/result-test";
 
-        String[] problems = new String[] { "tmp_experiments" };
-        String[] algorithms = new String[] { "NSGAII", "SPEA2", "IBEA" };
+        String[] problems = new String[] { "CAS", "JAMES", "EShop", "WeatherStation" };
+        String[] algorithms =
+            new String[] { "SPEA2-UniformCrossover", "IBEA-UniformCrossover", "NSGAII-UniformCrossover" /*
+                                                                                                         * "SPEA2-UniformCrossover"
+                                                                                                         * /
+                                                                                                         * *
+                                                                                                         * "SPEA2-fix-mut-2"
+                                                                                                         */};
 
         // String[] algorithms = new String[] { "SPEA2", "IBEA", "NSGAII",
         // "Random" };
@@ -97,7 +103,7 @@ public class ExperimentsMain {
                 // that represents the hypervolume of each front, calculating
                 // using the hypervolume handler
                 List<Double> hyperVolumes = frontsByAlgorithm.stream().map(front -> {
-                    double frontHypervolume = hypervolumeHandler.calculateHypervolume(front, 2);
+                    double frontHypervolume = hypervolumeHandler.calculateHypervolume(front, 3);
                     return frontHypervolume;
                 }).collect(Collectors.toList());
 

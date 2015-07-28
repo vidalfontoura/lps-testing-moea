@@ -1,8 +1,10 @@
 package edu.ufpr.gres.moea.operators;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.uma.jmetal.core.Solution;
 import org.uma.jmetal.core.Variable;
 import org.uma.jmetal.encoding.solutiontype.PermutationSolutionType;
@@ -105,8 +107,8 @@ public class ProductPMXCrossover extends Crossover {
         ProductsPermutation permutation1 = (ProductsPermutation) parent1.getDecisionVariables()[0];
         ProductsPermutation permutation2 = (ProductsPermutation) parent2.getDecisionVariables()[0];
 
-        int size1 = permutation1.getSize();
-        int size2 = permutation2.getSize();
+        int size1 = permutation1.getVector().length;
+        int size2 = permutation2.getVector().length;
 
         int[] parentVector1 = permutation1.getVector();
         int[] parentVector2 = permutation2.getVector();
@@ -143,8 +145,38 @@ public class ProductPMXCrossover extends Crossover {
                 firstHalfVector2 = Arrays.copyOfRange(parentVector2, 0, endFirstPart);
                 secondHalfVector2 = Arrays.copyOfRange(parentVector2, endFirstPart, size2);
             }
-            childVector1 = ArrayUtils.addAll(firstHalfVector1, secondHalfVector2);
-            childVector2 = ArrayUtils.addAll(firstHalfVector2, secondHalfVector1);
+
+            Set<Integer> childSet1 = new HashSet<Integer>();
+            for (int i = 0; i < firstHalfVector1.length; i++) {
+                childSet1.add(firstHalfVector1[i]);
+            }
+            for (int i = 0; i < secondHalfVector2.length; i++) {
+                childSet1.add(secondHalfVector2[i]);
+            }
+
+            Set<Integer> childSet2 = new HashSet<Integer>();
+            for (int i = 0; i < firstHalfVector2.length; i++) {
+                childSet2.add(firstHalfVector2[i]);
+            }
+            for (int i = 0; i < secondHalfVector1.length; i++) {
+                childSet2.add(secondHalfVector1[i]);
+            }
+
+            childVector1 = new int[childSet1.size()];
+            Iterator<Integer> iteratorChildSet1 = childSet1.iterator();
+            int count = 0;
+            while (iteratorChildSet1.hasNext()) {
+                childVector1[count] = iteratorChildSet1.next();
+                count++;
+            }
+
+            childVector2 = new int[childSet2.size()];
+            Iterator<Integer> iteratorChildSet2 = childSet2.iterator();
+            count = 0;
+            while (iteratorChildSet2.hasNext()) {
+                childVector2[count] = iteratorChildSet2.next();
+                count++;
+            }
 
         }
         if (size1 == 1 && size2 != 1) {
@@ -161,8 +193,36 @@ public class ProductPMXCrossover extends Crossover {
                 secondHalfVector2 = Arrays.copyOfRange(parentVector2, endFirstPart, size2);
             }
 
-            childVector2 = ArrayUtils.addAll(childVector1, secondHalfVector2);
-            childVector1 = ArrayUtils.addAll(childVector1, firstHalfVector2);
+            Set<Integer> childSet1 = new HashSet<Integer>();
+            Set<Integer> childSet2 = new HashSet<Integer>();
+            for (int i = 0; i < childVector1.length; i++) {
+                childSet1.add(childVector1[i]);
+                childSet2.add(childVector1[i]);
+            }
+
+            for (int i = 0; i < firstHalfVector2.length; i++) {
+                childSet1.add(firstHalfVector2[i]);
+            }
+
+            for (int i = 0; i < secondHalfVector2.length; i++) {
+                childSet2.add(secondHalfVector2[i]);
+            }
+
+            childVector1 = new int[childSet1.size()];
+            Iterator<Integer> iteratorChildSet1 = childSet1.iterator();
+            int count = 0;
+            while (iteratorChildSet1.hasNext()) {
+                childVector1[count] = iteratorChildSet1.next();
+                count++;
+            }
+
+            childVector2 = new int[childSet2.size()];
+            Iterator<Integer> iteratorChildSet2 = childSet2.iterator();
+            count = 0;
+            while (iteratorChildSet2.hasNext()) {
+                childVector2[count] = iteratorChildSet2.next();
+                count++;
+            }
 
         }
 
@@ -180,8 +240,36 @@ public class ProductPMXCrossover extends Crossover {
                 secondHalfVector1 = Arrays.copyOfRange(parentVector1, endFirstPart, size1);
             }
 
-            childVector1 = ArrayUtils.addAll(childVector2, firstHalfVector1);
-            childVector2 = ArrayUtils.addAll(childVector2, secondHalfVector1);
+            Set<Integer> childSet1 = new HashSet<Integer>();
+            Set<Integer> childSet2 = new HashSet<Integer>();
+            for (int i = 0; i < childVector2.length; i++) {
+                childSet1.add(childVector2[i]);
+                childSet2.add(childVector2[i]);
+            }
+
+            for (int i = 0; i < firstHalfVector1.length; i++) {
+                childSet1.add(firstHalfVector1[i]);
+            }
+
+            for (int i = 0; i < secondHalfVector1.length; i++) {
+                childSet2.add(secondHalfVector1[i]);
+            }
+
+            childVector1 = new int[childSet1.size()];
+            Iterator<Integer> iteratorChildSet1 = childSet1.iterator();
+            int count = 0;
+            while (iteratorChildSet1.hasNext()) {
+                childVector1[count] = iteratorChildSet1.next();
+                count++;
+            }
+
+            childVector2 = new int[childSet2.size()];
+            Iterator<Integer> iteratorChildSet2 = childSet2.iterator();
+            count = 0;
+            while (iteratorChildSet2.hasNext()) {
+                childVector2[count] = iteratorChildSet2.next();
+                count++;
+            }
 
         }
 

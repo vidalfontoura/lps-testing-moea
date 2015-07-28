@@ -7,6 +7,7 @@ import org.uma.jmetal.core.Algorithm;
 import org.uma.jmetal.core.Operator;
 import org.uma.jmetal.core.SolutionSet;
 import org.uma.jmetal.metaheuristic.multiobjective.nsgaII.NSGAIITemplate;
+import org.uma.jmetal.operator.crossover.PMXCrossover;
 import org.uma.jmetal.operator.selection.BinaryTournament2;
 import org.uma.jmetal.util.evaluator.SequentialSolutionSetEvaluator;
 import org.uma.jmetal.util.evaluator.SolutionSetEvaluator;
@@ -27,7 +28,7 @@ public class NSGAIIMain {
         }
 
         String path = "experiments/tmp_experiments";
-        String algorithms = "NSGAII";
+        String algorithms = "NSGAII-Teste";
         int executions = 30;
 
         LPSTestingProblem problem;
@@ -38,8 +39,9 @@ public class NSGAIIMain {
 
         String productsPath = "products_mutants/PROD_";
         String mutantsPath = "products_mutants/PROD_MUTANTS_";
+        String pairsPath = "products_mutants/PROD_PAIRS_";
 
-        problem = new LPSTestingProblem(productsPath, mutantsPath);
+        problem = new LPSTestingProblem(productsPath, mutantsPath, pairsPath);
         List<Product> products = ((LPSTestingProblem) problem).getProducts();
 
         SolutionSetEvaluator evaluator = new SequentialSolutionSetEvaluator();
@@ -53,10 +55,11 @@ public class NSGAIIMain {
 
         double crossoverProbability = 0.9;
 
+        crossover = new PMXCrossover.Builder().setProbability(crossoverProbability).build();
         crossover = new ProductPMXCrossover.Builder().setProbability(crossoverProbability).build();
         builder.setCrossover(crossover);
 
-        double mutationProbability = 1.0 / problem.getNumberOfVariables();
+        double mutationProbability = 0.01;
         mutation = new ProductMutation.Builder().setProducts(products).setProbability(mutationProbability).build();
         builder.setMutation(mutation);
 

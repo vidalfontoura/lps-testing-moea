@@ -1,9 +1,9 @@
 package edu.ufpr.gres.moea.problem;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
+import java.util.Random;
 
 import org.uma.jmetal.core.Variable;
 import org.uma.jmetal.encoding.variable.Permutation;
@@ -14,48 +14,78 @@ public class ProductsPermutation extends Permutation {
     private static final long serialVersionUID = 2657470069340722041L;
 
     private int[] vector;
+    private List<Integer> possibleValues;
 
-    private int size;
+    private int numberOfRemovedProducts;
 
     public ProductsPermutation() {
 
-        size = 0;
+        numberOfRemovedProducts = 0;
         vector = null;
+    }
+
+    public ProductsPermutation(String[] vectorStr) {
+
+        this.vector = new int[vectorStr.length];
+        for (int i = 0; i < vectorStr.length; i++) {
+            this.vector[i] = Integer.valueOf(vectorStr[i]);
+        }
     }
 
     public ProductsPermutation(int[] vector) {
 
         this.vector = vector;
-        this.size = vector.length;
+        this.numberOfRemovedProducts = vector.length;
     }
 
     public ProductsPermutation(int size, int upperBound) {
 
-        this.size = size;
-        vector = new int[this.size];
+        this.numberOfRemovedProducts = size;
+        this.possibleValues = getPossibleValues(upperBound);
 
-        Set<Integer> randomSequence = new HashSet<>();
+        List<Integer> products = new ArrayList<>(this.possibleValues);
 
-        while (randomSequence.size() != this.size) {
-            int randInt = PseudoRandom.randInt(1, upperBound);
-            randomSequence.add(randInt);
+        for (int i = 0; i < this.numberOfRemovedProducts; i++) {
+            int randInt = PseudoRandom.randInt(0, products.size() - 1);
+            products.remove(randInt);
         }
 
-        Iterator<Integer> iterator = randomSequence.iterator();
-        int count = 0;
-        while (iterator.hasNext()) {
-            vector[count] = iterator.next();
-            count++;
+        vector = new int[products.size()];
+        for (int i = 0; i < products.size(); i++) {
+            vector[i] = products.get(i);
         }
 
     }
 
     public ProductsPermutation(ProductsPermutation permutation) {
 
-        size = permutation.size;
-        vector = new int[size];
+        numberOfRemovedProducts = permutation.numberOfRemovedProducts;
+        vector = new int[permutation.getVector().length];
 
-        System.arraycopy(permutation.vector, 0, vector, 0, size);
+        System.arraycopy(permutation.vector, 0, vector, 0, permutation.getVector().length);
+    }
+
+    public List<Integer> getPossibleValues(int bounds) {
+
+        if (possibleValues == null) {
+            possibleValues = new ArrayList<Integer>();
+            for (int i = 0; i < bounds; i++) {
+                possibleValues.add(i);
+            }
+        }
+        return possibleValues;
+    }
+
+    public void shuffleArray(int[] ar) {
+
+        Random rnd = new Random();
+        for (int i = ar.length - 1; i > 0; i--) {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            int a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
     }
 
     public int[] getVector() {
@@ -65,7 +95,7 @@ public class ProductsPermutation extends Permutation {
 
     public int getSize() {
 
-        return size;
+        return numberOfRemovedProducts;
     }
 
     public Variable copy() {
@@ -75,7 +105,7 @@ public class ProductsPermutation extends Permutation {
 
     public int getLength() {
 
-        return size;
+        return numberOfRemovedProducts;
     }
 
     public String toString() {
@@ -83,7 +113,7 @@ public class ProductsPermutation extends Permutation {
         String string;
 
         string = "";
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < vector.length; i++) {
             string += vector[i] + " ";
         }
 
@@ -95,7 +125,7 @@ public class ProductsPermutation extends Permutation {
 
         final int prime = 31;
         int result = 1;
-        result = prime * result + size;
+        result = prime * result + numberOfRemovedProducts;
         result = prime * result + Arrays.hashCode(vector);
         return result;
     }
@@ -113,7 +143,7 @@ public class ProductsPermutation extends Permutation {
             return false;
         }
         ProductsPermutation other = (ProductsPermutation) obj;
-        if (size != other.size) {
+        if (numberOfRemovedProducts != other.numberOfRemovedProducts) {
             return false;
         }
         if (!Arrays.equals(vector, other.vector)) {

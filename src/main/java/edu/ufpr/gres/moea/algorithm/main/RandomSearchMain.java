@@ -19,13 +19,14 @@ public class RandomSearchMain {
         }
 
         String path = "experiments/tmp_experiments";
-        String algorithms = "Random";
+        String algorithms = "Random-3obj-1-";
         int executions = 30;
 
         String productsPath = "products_mutants/PROD_";
         String mutantsPath = "products_mutants/PROD_MUTANTS_";
+        String pairsPath = "products_mutants/PROD_PAIRS_";
 
-        LPSTestingProblem problem = new LPSTestingProblem(productsPath, mutantsPath);
+        LPSTestingProblem problem = new LPSTestingProblem(productsPath, mutantsPath, pairsPath);
 
         RandomSearch.Builder builder = new RandomSearch.Builder(problem);
 

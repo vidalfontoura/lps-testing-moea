@@ -19,19 +19,31 @@ public class LPSTestingProblem extends Problem {
     private List<Product> products;
 
     private int maxUpperLimit;
+    private Set<String> totalActiveMutants;
+    private Set<String> totalPairsWise;
 
     int count = 0;
 
-    public LPSTestingProblem(String productsPath, String mutantsPath) throws IOException {
+    public LPSTestingProblem(String productsPath, String mutantsPath, String pairsPath) throws IOException {
 
         super();
-        this.products = ProductReaderUtils.readProductsAndMutants(productsPath, mutantsPath);
-        this.numberOfObjectives = 2;
+        this.products = ProductReaderUtils.readProductsAndMutants(productsPath, mutantsPath, pairsPath);
+        this.totalActiveMutants = new HashSet<String>();
+        this.products.stream().forEach(product -> {
+            totalActiveMutants.addAll(product.getMutants());
+        });
+
+        this.totalPairsWise = new HashSet<String>();
+        this.products.stream().forEach(product -> {
+            totalPairsWise.addAll(product.getPairs());
+        });
+
+        this.numberOfObjectives = 3;
         this.numberOfConstraints = 0;
         this.problemName = "LPSTestingProblem";
         this.numberOfVariables = 1;
 
-        maxUpperLimit = 449;
+        maxUpperLimit = this.products.size();
         upperLimit = new double[numberOfVariables];
         lowerLimit = new double[numberOfVariables];
 
@@ -47,21 +59,50 @@ public class LPSTestingProblem extends Problem {
     @Override
     public void evaluate(Solution solution) throws JMetalException {
 
-        int mutationScore = this.calculateMutationScore(solution);
-
         ProductsPermutation permutation = (ProductsPermutation) solution.getDecisionVariables()[0];
 
-        int productsSize = permutation.getSize();
-        // System.out.print(mutationScore + " " + productsSize);
-        // System.out.println();
+        int productsSize = permutation.getVector().length;
+
+        double mutationScore = this.getMutationScore(permutation);
+        double pairWiseScore = this.getPairsWiseScore(permutation);
+        double productsSizeObj = (double) productsSize / products.size();
+        //
+        // System.out.println("Mutation Score: " + mutationScore);
+        // System.out.println("Size: " + productsSizeObj);
+        // System.out.println("Distinct features:" + distinctFeatures);
         solution.setObjective(0, -mutationScore);
-        solution.setObjective(1, productsSize);
+        solution.setObjective(1, productsSizeObj);
+        solution.setObjective(2, -pairWiseScore);
 
     }
 
-    public int calculateMutationScore(Solution solutionProducts) {
+    public double getPairsWiseScore(ProductsPermutation permutation) {
 
-        ProductsPermutation permutation = (ProductsPermutation) solutionProducts.getDecisionVariables()[0];
+        Set<String> pairsWiseSet = new HashSet<String>();
+        int[] vector = permutation.getVector();
+        for (int i = 0; i < vector.length; i++) {
+            int productId = vector[i];
+            Optional<Product> optProduct = products.stream().filter(product -> {
+                return product.getProductId().equals(String.valueOf(productId));
+            }).findFirst();
+            if (optProduct.isPresent()) {
+                Product product = optProduct.get();
+                pairsWiseSet.addAll(product.getPairs());
+            } else {
+                // Product didn't find check how to handle this
+                System.out.println("Product: " + productId + " does not exists");
+            }
+        }
+
+        // System.out.println("Pairs Wise Coverage: " + pairsWiseSet.size());
+
+        double pairsWiseCoverage = (double) pairsWiseSet.size() / totalPairsWise.size();
+
+        return pairsWiseCoverage;
+
+    }
+
+    public double getMutationScore(ProductsPermutation permutation) {
 
         Set<String> mutantsKilled = new HashSet<String>();
         int[] vector = permutation.getVector();
@@ -75,11 +116,17 @@ public class LPSTestingProblem extends Problem {
                 mutantsKilled.addAll(product.getMutants());
             } else {
                 // Product didn't find check how to handle this
-                System.out.println("Product does not exists");
-                // Repare or penalize
+                System.out.println("Product: " + productId + " does not exists");
             }
         }
-        return mutantsKilled.size();
+
+        // System.out.println("Mutantes mortos:" + mutantsKilled.size());
+        // System.out.println("Total Mutants:" + totalActiveMutants.size());
+        double mutationScore = (double) mutantsKilled.size() / totalActiveMutants.size();
+        // System.out.println("Mutation score: " + mutationScore);
+
+        // return mutantsKilled.size();
+        return mutationScore;
     }
 
     public SolutionSet removeDominateds(SolutionSet result) {
@@ -141,7 +188,7 @@ public class LPSTestingProblem extends Problem {
 
     public int getNumberOfProducts() {
 
-        int randInt = PseudoRandom.randInt(1, maxUpperLimit);
+        int randInt = PseudoRandom.randInt(0, this.products.size() - 1);
         return randInt;
     }
 

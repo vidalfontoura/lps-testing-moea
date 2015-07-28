@@ -21,12 +21,13 @@ public class IBEAMain {
 
     public static void main(String[] args) throws Exception {
 
-        File file = new File("experiments");
-        if (!file.exists()) {
-            file.mkdir();
+        File experimentsPath = new File("experiments");
+        if (!experimentsPath.exists()) {
+            experimentsPath.mkdir();
         }
+        File featureModelPath = new File(experimentsPath.getPath() + File.separator + "tmp_experiments");
 
-        String path = "experiments/tmp_experiments";
+        String path = featureModelPath.getPath();
         String algorithms = "IBEA";
         int executions = 30;
 
@@ -37,8 +38,9 @@ public class IBEAMain {
 
         String productsPath = "products_mutants/PROD_";
         String mutantsPath = "products_mutants/PROD_MUTANTS_";
+        String pairsPath = "products_mutants/PROD_PAIRS_";
 
-        problem = new LPSTestingProblem(productsPath, mutantsPath);
+        problem = new LPSTestingProblem(productsPath, mutantsPath, pairsPath);
         List<Product> products = ((LPSTestingProblem) problem).getProducts();
 
         IBEA.Builder builder = new IBEA.Builder(problem);
@@ -56,7 +58,7 @@ public class IBEAMain {
         crossover = new ProductPMXCrossover.Builder().setProbability(crossoverProbability).build();
         builder.setCrossover(crossover);
 
-        double mutationProbability = 1.0 / problem.getNumberOfVariables();
+        double mutationProbability = 0.01;
 
         mutation = new ProductMutation.Builder().setProducts(products).setProbability(mutationProbability).build();
         builder.setMutation(mutation);

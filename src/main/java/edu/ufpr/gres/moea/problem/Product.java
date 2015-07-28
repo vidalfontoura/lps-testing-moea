@@ -8,6 +8,21 @@ public class Product {
     private String productId;
     private List<String> features;
     private List<String> mutants;
+    private List<String> pairs;
+
+    public List<String> getPairs() {
+
+        if (pairs == null) {
+            pairs = new ArrayList<String>();
+        }
+
+        return pairs;
+    }
+
+    public void setPairs(List<String> pairs) {
+
+        this.pairs = pairs;
+    }
 
     public List<String> getFeatures() {
 
